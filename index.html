@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Leaflet for interactive map layers -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+
+<body data-theme="light">
+    <!-- top nav bar -->
+    <header class="header">
+        <div class="header-content">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search location..." id="searchInput">
+                <button class="search-btn" id="searchBtn" aria-label="Search">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="date-time-display">
+                <div class="current-date" id="currentDate"></div>
+                <div class="current-time" id="currentTime"></div>
+            </div>
+            <div class="header-right" style="gap: 16px;">
+                <select id="languageSelect" class="language-select" aria-label="Select language">
+                    <option value="en">English</option>
+                    <option value="kn">ಕನ್ನಡ</option>
+                    <option value="hi">हिन्दी</option>
+                </select>
+                <div class="weather-summary-icon">⛅</div>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <svg class="sun-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="moon-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- main weather content -->
+    <main class="main-content">
+        <!-- permission section-->
+        <section class="permission-section" id="permissionSection">
+            <div class="permission-card">
+                <div class="permission-icon">📍🗺️</div>
+                <div class="permission-text">Allow location access to get weather updates for your area.</div>
+                <button class="permission-btn" id="permissionBtn">Allow Location Access</button>
+                <button class="manual-btn" id="manualBtn">Add City Manually</button>
+            </div>
+        </section>
+
+        <!-- big weather card -->
+        <section class="current-weather-section">
+            <div class="current-weather-card">
+                <div class="weather-icon-large">⛅</div>
+                <div class="temperature-display">
+                    <span class="temperature-number" id="temperatureNumber"></span>
+                    <span class="temperature-unit">°C</span>
+                </div>
+                <div class="feels-like" id="feelsLikeText">Feels like --°C</div>
+                <div class="city-name" id="cityName">City Name</div>
+                <div class="weather-condition" id="weatherCondition">Weather Description</div>
+                <div class="weather-details">
+                    <div class="detail-item">
+                        <span class="detail-icon">💧</span>
+                        <span class="detail-text"><span id="humidity">0</span>% Humidity</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">💨</span>
+                        <span class="detail-text"><span id="windSpeed">0</span> mph Wind</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- extra weather info -->
+        <section class="stats-section">
+            <h2 class="section-title">Additional Information</h2>
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <div class="stat-label">Sunrise</div>
+                    <div class="stat-icon">🌅</div>
+                    <div class="stat-value" id="sunrise">0 AM</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Sunset</div>
+                    <div class="stat-icon">🌇</div>
+                    <div class="stat-value" id="sunset">0 PM</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Pressure</div>
+                    <div class="stat-value" id="pressure">0</div>
+                    <div class="stat-unit">hPa</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Visibility</div>
+                    <div class="stat-icon">👁️</div>
+                    <div class="stat-value" id="visibility">0 km</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Precipitation</div>
+                    <div class="stat-icon">🌧️</div>
+                    <div class="stat-value" id="precipitation">0 mm</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Cloud Cover</div>
+                    <div class="stat-icon">☁️</div>
+                    <div class="stat-value" id="cloudCover">0%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Air Quality Index</div>
+                    <div class="stat-icon">🌫️</div>
+                    <div class="stat-value" id="aqiValue">--</div>
+                    <div class="stat-unit" id="aqiStatus">Loading...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- alerts and suggestions -->
+        <section class="alerts-section">
+            <h2 class="section-title">Weather Alerts & Suggestions</h2>
+            <div class="alerts-grid">
+                <div class="alert-card">
+                    <div class="alert-label">Alerts</div>
+                    <div class="alert-text" id="alertText">No severe weather detected.</div>
+                </div>
+                <div class="alert-card">
+                    <div class="alert-label">Clothing Suggestion</div>
+                    <div class="alert-text" id="clothingSuggestion">Check the latest weather to get outfit advice.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- next 5 days overview -->
+        <section class="forecast-section">
+            <h2 class="section-title">Next 5 Days Overview</h2>
+            <div class="forecast-grid" id="forecastContainer" aria-live="polite">
+                <!-- forecast cards will be injected here -->
+            </div>
+        </section>
+
+        <!-- map -->
+        <section class="map-section">
+            <h2 class="section-title">Location Map</h2>
+            <div class="map-card">
+                <div class="map-layer-controls">
+                    <button class="map-layer-btn active" id="layerTemp">Temperature</button>
+                    <button class="map-layer-btn" id="layerClouds">Clouds</button>
+                    <button class="map-layer-btn" id="layerWind">Wind</button>
+                    <button class="map-layer-btn" id="layerPrecip">Precipitation</button>
+                </div>
+                <div id="mapContainer" class="map-frame" aria-label="Weather map"></div>
+            </div>
+        </section>
+
+        <!-- simple AI assistant -->
+        <section class="assistant-section">
+            <h2 class="section-title">AI Weather Assistant</h2>
+            <div class="assistant-card">
+                <div class="assistant-messages" id="assistantConversation" aria-live="polite"></div>
+                <div class="assistant-inputs">
+                    <textarea id="assistantInput" rows="2" placeholder="Ask about temperature, rain, wind, or what to wear..."></textarea>
+                    <button id="assistantSend">Ask</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- activity planner + AI features -->
+        <section class="smart-section">
+            <h2 class="section-title">Activity Planner & AI Suggestions</h2>
+            <div class="smart-grid">
+                <div class="smart-card">
+                    <h3 class="smart-title">Best Time for Jogging</h3>
+                    <p class="smart-body" id="joggingTime">Load a city to see jogging recommendations.</p>
+                </div>
+                <div class="smart-card">
+                    <h3 class="smart-title">Best Time for Cycling</h3>
+                    <p class="smart-body" id="cyclingTime">We’ll pick cooler, less windy hours for cycling.</p>
+                </div>
+                <div class="smart-card">
+                    <h3 class="smart-title">Best Time for Picnic</h3>
+                    <p class="smart-body" id="picnicTime">Sunny, comfortable hours will appear here.</p>
+                </div>
+                <div class="smart-card">
+                    <h3 class="smart-title">Predictive Trends</h3>
+                    <p class="smart-body" id="predictiveText">Short-term trends based on the next few days forecast.</p>
+                </div>
+                <div class="smart-card">
+                    <h3 class="smart-title">Personalized Alerts (Example)</h3>
+                    <p class="smart-body" id="alertsText">We’ll warn you if rain is likely between 6–8 AM in the next day.</p>
+                </div>
+                <div class="smart-card">
+                    <h3 class="smart-title">Mood-Based Suggestions</h3>
+                    <p class="smart-body" id="moodSuggestion">Check the weather to get a playlist or movie mood.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- comparison + charts + history -->
+        <section class="extras-section">
+            <h2 class="section-title">Insights & Tools</h2>
+            <div class="extras-grid">
+                <div class="extras-card">
+                    <h3 class="extras-subtitle">Temperature Trend (Next 24h)</h3>
+                    <canvas id="tempChart" aria-label="Temperature trend chart"></canvas>
+                </div>
+                <div class="extras-card">
+                    <h3 class="extras-subtitle">Compare Two Cities</h3>
+                    <div class="compare-controls">
+                        <input type="text" id="compareCity1" placeholder="First city">
+                        <input type="text" id="compareCity2" placeholder="Second city">
+                        <button id="compareBtn">Compare</button>
+                    </div>
+                    <div class="compare-results">
+                        <div class="compare-column" id="compareResult1"></div>
+                        <div class="compare-column" id="compareResult2"></div>
+                    </div>
+                </div>
+                <div class="extras-card">
+                    <h3 class="extras-subtitle">Recent Weather History</h3>
+                    <ul class="history-list" id="historyList"></ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
